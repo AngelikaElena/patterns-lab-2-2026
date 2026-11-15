@@ -14,3 +14,12 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-q"
 pythonpath = ["."]
+
+[tool.setuptools]
+packages = [
+    "interfaces",
+    "messages",
+    "decorators",
+    "proxies",
+    "security",
+]
