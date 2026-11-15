@@ -10,31 +10,50 @@ from security import UserContext
 
 
 def main() -> None:
-    # --- ЧАСТЬ 1: ДЕКОРАТОРЫ ---
-    base_message = Message("С наступающим Новым годом!")
+    # ==========================================
+    # ЧАСТЬ 1: ДЕМОНСТРАЦИЯ РАБОТЫ ДЕКОРАТОРОВ
+    # ==========================================
     
-    # Собираем красивую цепочку декораторов
-    decorated_message = HeaderDecorator(
+    # 1. Базовое сообщение
+    base_message = Message("С наступающим Новым годом!")
+    print("--- 0. Исходное сообщение ---")
+    print(base_message.render())
+    print()
+
+    # 2. Собираем текстовую цепочку (без Base64)
+    # Порядок вложенности: Signature -> Date -> Header
+    text_message = HeaderDecorator(
         DateDecorator(
             SignatureDecorator(base_message, signature="С уважением, Мария")
         ),
         header="=== ВАЖНОЕ УВЕДОМЛЕНИЕ ==="
     )
 
-    print("--- 1. Результат работы декораторов ---")
-    print(decorated_message.render())
+    print("--- 1. Результат работы текстовых декораторов ---")
+    print(text_message.render())
     print()
 
-    # --- ЧАСТЬ 2: ПРОКСИ (ЗАЩИТА ДОСТУПА) ---
-    print("--- 2. Демонстрация работы Proxy ---")
+    # 3. Оборачиваем всю цепочку в Base64Decorator
+    base64_message = Base64Decorator(text_message)
+    
+    print("--- 2. Результат работы Base64Decorator ---")
+    print(base64_message.render())
+    print()
+
+    # ==========================================
+    # ЧАСТЬ 2: ДЕМОНСТРАЦИЯ РАБОТЫ ПРОКСИ (PROXY)
+    # ==========================================
+    
+    print("--- 3. Демонстрация работы Proxy ---")
     
     # Создаем пользователей
     admin_user = UserContext.of("Alice", "admin", "user")
     guest_user = UserContext.of("Bob", "guest")
 
-    # Оборачиваем наше красивое сообщение в Прокси (требуем роль "admin")
+    # Оборачиваем наше текстовое сообщение в Прокси (требуем роль "admin")
+    # Для удобства чтения передаем text_message, а не base64_message
     proxy = ProtectedMessageProxy(
-        message=decorated_message,
+        message=text_message,
         user=admin_user,
         required_role="admin"
     )
@@ -48,9 +67,9 @@ def main() -> None:
     print()
 
     # Попытка 2: Отказ в доступе (пользователь Bob - guest)
-    # Для этого создаем новый Прокси с тем же сообщением, но для Bob'а
+    # Создаем новый Прокси с тем же сообщением, но для Bob'а
     proxy_for_guest = ProtectedMessageProxy(
-        message=decorated_message,
+        message=text_message,
         user=guest_user,
         required_role="admin"
     )

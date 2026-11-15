@@ -23,7 +23,7 @@ class MessageDecorator(BaseMessage):
     Реализует тот же интерфейс BaseMessage и хранит ссылку на оборачиваемый объект.
     """
     def __init__(self, message: BaseMessage) -> None:
-        self._message = message
+        self._message = message # сохраняем "обернутый" объект
 
     def render(self) -> str:
         # По умолчанию просто делегирует вызов внутреннему объекту
